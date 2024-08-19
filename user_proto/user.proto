@@ -1,0 +1,93 @@
+// 声明 proto 语法版本，固定值
+syntax = "proto3";
+
+// 生成 golang 代码后的包名 新版本的protoc和protobuf这里应该写成 option go_package = "./;proto";
+option go_package = ".;user_pb";
+
+
+// 定义用户服务
+service User {
+  // 定义一个 GetUserList 获取用户列表  需要做分页
+  rpc GetUserList(PageInfo) returns (UserListResponse);
+  // 定义一个 GetUserByMobile 获取用户信息通过手机号
+  rpc GetUserByMobile(MobileRequest) returns (UserInfoResponse);
+  // 定义一个 CheckPassWord 检查密码
+  rpc CheckPassWord(PasswordCheckInfo) returns (CheckResponse);
+  // 定义一个 CreateUser 创建用户
+  rpc CreateUser(CreateUserInfo) returns (UserInfoResponse);
+  // 定义一个 UpdateUser 更新用户
+  rpc UpdateUser(UpdateUserInfo) returns (UserEmpty);
+
+}
+
+//更新用户不返回任何的数据
+message UserEmpty {}
+
+// 定义GetUserList 方法请求体
+message PageInfo {
+  //pn 当前页
+  uint32 pn = 1;
+  //pSize 每页条数
+  uint32 pSize = 2;
+}
+
+//UserInfoResponse 单条用户的信息
+message UserInfoResponse {
+  int32 id = 1;
+  string passWord = 2;
+  string mobile = 3;
+  string nickName = 4;
+  uint64 birthDay = 5;
+  int32 gender = 6;
+  int32 role = 7;
+  int32 status = 8;
+}
+
+// 定义GetUserList 方法响应体
+message UserListResponse {
+  //总条数
+  int32 total = 1;
+  // 用户列表
+  repeated UserInfoResponse data = 2;
+}
+
+
+// GetUserByMobile 方法请求体
+message MobileRequest {
+  //mobile 手机号
+  string mobile = 1;
+}
+
+message PasswordCheckInfo{
+  //明文密码 123456
+  string password = 1;
+  //密文密码 是调用 rpc GetUserByMobile之后得到密文密码
+  string encryptedPassword = 2;
+}
+
+//CheckResponse 检查密码返回体
+message CheckResponse{
+  //true 成功 false 失败
+  bool success = 1;
+}
+
+//CreateUserInfo 创建用户请求体
+message CreateUserInfo{
+  //昵称
+  string nickName = 1;
+  //手机号
+  string mobile = 2;
+  //明文密码 123456
+  string password = 3;
+}
+
+message UpdateUserInfo {
+  //id 主键id主要是修改的条件
+  int32 id = 1;
+  //昵称
+  string nickName = 2;
+  //性别
+  int32 gender = 3;
+  //生日
+  uint64 birthDay = 4;
+}

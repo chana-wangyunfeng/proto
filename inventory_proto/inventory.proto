@@ -1,0 +1,35 @@
+// 声明 proto 语法版本，固定值
+syntax = "proto3";
+
+// 生成 golang 代码后的包名 新版本的protoc和protobuf这里应该写成 option go_package = "./;proto";
+option go_package = ".;inventory_pb";
+
+
+// 定义库存服务
+service Inventory {
+
+  //设置库存的rpc方法
+  rpc SetInv(GoodsInvInfo) returns(InventoryEmpty);
+  //获取库存信息
+  rpc  InvDetail(GoodsInvInfo) returns (GoodsInvInfo);
+
+  //因为购物车有可能添加多件商品，所以下订单是扣减多件商品的库存
+  //扣减库存
+  rpc Sell(SellInfo) returns (InventoryEmpty);
+
+  //归还库存
+  rpc Reback(SellInfo) returns (InventoryEmpty);
+}
+
+
+message InventoryEmpty {}
+
+message GoodsInvInfo{
+  int32 goodsId = 1;
+  int32 num = 2;
+}
+
+message SellInfo {
+  repeated GoodsInvInfo goodsInfo = 1;
+  string orderSn = 2;
+}
