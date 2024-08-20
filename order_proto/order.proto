@@ -128,5 +128,4 @@ message UpdateOrderInfoRequest {
   string status = 3;
   string tradeNo = 4;
   string orderSn = 5;
-
 }
