@@ -21,10 +21,13 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	Inventory_SetInv_FullMethodName    = "/Inventory/SetInv"
-	Inventory_InvDetail_FullMethodName = "/Inventory/InvDetail"
-	Inventory_Sell_FullMethodName      = "/Inventory/Sell"
-	Inventory_Reback_FullMethodName    = "/Inventory/Reback"
+	Inventory_SetInv_FullMethodName      = "/Inventory/SetInv"
+	Inventory_InvDetail_FullMethodName   = "/Inventory/InvDetail"
+	Inventory_Sell_FullMethodName        = "/Inventory/Sell"
+	Inventory_TrySell_FullMethodName     = "/Inventory/TrySell"
+	Inventory_ConfirmSell_FullMethodName = "/Inventory/ConfirmSell"
+	Inventory_CancelSell_FullMethodName  = "/Inventory/CancelSell"
+	Inventory_Reback_FullMethodName      = "/Inventory/Reback"
 )
 
 // InventoryClient is the client API for Inventory service.
@@ -40,6 +43,12 @@ type InventoryClient interface {
 	// 因为购物车有可能添加多件商品，所以下订单是扣减多件商品的库存
 	// 扣减库存
 	Sell(ctx context.Context, in *SellInfo, opts ...grpc.CallOption) (*InventoryEmpty, error)
+	// 尝试扣减库存
+	TrySell(ctx context.Context, in *SellInfo, opts ...grpc.CallOption) (*InventoryEmpty, error)
+	// 确认扣减库存
+	ConfirmSell(ctx context.Context, in *SellInfo, opts ...grpc.CallOption) (*InventoryEmpty, error)
+	// 取消扣减库存
+	CancelSell(ctx context.Context, in *SellInfo, opts ...grpc.CallOption) (*InventoryEmpty, error)
 	// 归还库存
 	Reback(ctx context.Context, in *SellInfo, opts ...grpc.CallOption) (*InventoryEmpty, error)
 }
@@ -82,6 +91,36 @@ func (c *inventoryClient) Sell(ctx context.Context, in *SellInfo, opts ...grpc.C
 	return out, nil
 }
 
+func (c *inventoryClient) TrySell(ctx context.Context, in *SellInfo, opts ...grpc.CallOption) (*InventoryEmpty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(InventoryEmpty)
+	err := c.cc.Invoke(ctx, Inventory_TrySell_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *inventoryClient) ConfirmSell(ctx context.Context, in *SellInfo, opts ...grpc.CallOption) (*InventoryEmpty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(InventoryEmpty)
+	err := c.cc.Invoke(ctx, Inventory_ConfirmSell_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *inventoryClient) CancelSell(ctx context.Context, in *SellInfo, opts ...grpc.CallOption) (*InventoryEmpty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(InventoryEmpty)
+	err := c.cc.Invoke(ctx, Inventory_CancelSell_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *inventoryClient) Reback(ctx context.Context, in *SellInfo, opts ...grpc.CallOption) (*InventoryEmpty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(InventoryEmpty)
@@ -105,6 +144,12 @@ type InventoryServer interface {
 	// 因为购物车有可能添加多件商品，所以下订单是扣减多件商品的库存
 	// 扣减库存
 	Sell(context.Context, *SellInfo) (*InventoryEmpty, error)
+	// 尝试扣减库存
+	TrySell(context.Context, *SellInfo) (*InventoryEmpty, error)
+	// 确认扣减库存
+	ConfirmSell(context.Context, *SellInfo) (*InventoryEmpty, error)
+	// 取消扣减库存
+	CancelSell(context.Context, *SellInfo) (*InventoryEmpty, error)
 	// 归还库存
 	Reback(context.Context, *SellInfo) (*InventoryEmpty, error)
 	mustEmbedUnimplementedInventoryServer()
@@ -122,6 +167,15 @@ func (UnimplementedInventoryServer) InvDetail(context.Context, *GoodsInvInfo) (*
 }
 func (UnimplementedInventoryServer) Sell(context.Context, *SellInfo) (*InventoryEmpty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Sell not implemented")
+}
+func (UnimplementedInventoryServer) TrySell(context.Context, *SellInfo) (*InventoryEmpty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TrySell not implemented")
+}
+func (UnimplementedInventoryServer) ConfirmSell(context.Context, *SellInfo) (*InventoryEmpty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConfirmSell not implemented")
+}
+func (UnimplementedInventoryServer) CancelSell(context.Context, *SellInfo) (*InventoryEmpty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CancelSell not implemented")
 }
 func (UnimplementedInventoryServer) Reback(context.Context, *SellInfo) (*InventoryEmpty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Reback not implemented")
@@ -193,6 +247,60 @@ func _Inventory_Sell_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Inventory_TrySell_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SellInfo)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(InventoryServer).TrySell(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Inventory_TrySell_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(InventoryServer).TrySell(ctx, req.(*SellInfo))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Inventory_ConfirmSell_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SellInfo)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(InventoryServer).ConfirmSell(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Inventory_ConfirmSell_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(InventoryServer).ConfirmSell(ctx, req.(*SellInfo))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Inventory_CancelSell_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SellInfo)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(InventoryServer).CancelSell(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Inventory_CancelSell_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(InventoryServer).CancelSell(ctx, req.(*SellInfo))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Inventory_Reback_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SellInfo)
 	if err := dec(in); err != nil {
@@ -229,6 +337,18 @@ var Inventory_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Sell",
 			Handler:    _Inventory_Sell_Handler,
+		},
+		{
+			MethodName: "TrySell",
+			Handler:    _Inventory_TrySell_Handler,
+		},
+		{
+			MethodName: "ConfirmSell",
+			Handler:    _Inventory_ConfirmSell_Handler,
+		},
+		{
+			MethodName: "CancelSell",
+			Handler:    _Inventory_CancelSell_Handler,
 		},
 		{
 			MethodName: "Reback",
