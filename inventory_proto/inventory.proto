@@ -16,6 +16,15 @@ service Inventory {
   //因为购物车有可能添加多件商品，所以下订单是扣减多件商品的库存
   //扣减库存
   rpc Sell(SellInfo) returns (InventoryEmpty);
+  //尝试扣减库存
+  rpc TrySell(SellInfo) returns (InventoryEmpty);
+  //确认扣减库存
+  rpc ConfirmSell(SellInfo) returns (InventoryEmpty);
+  //取消扣减库存
+  rpc CancelSell(SellInfo) returns (InventoryEmpty);
+
+
+
 
   //归还库存
   rpc Reback(SellInfo) returns (InventoryEmpty);
