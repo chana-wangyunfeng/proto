@@ -128,7 +128,9 @@ message UpdateOrderInfoRequest {
   string status = 3;
   string tradeNo = 4;
   string orderSn = 5;
+  string post = 6;
   string address = 7;
   string name = 8;
   string mobile = 9;
+  string payTime  =10;
 }
