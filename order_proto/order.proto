@@ -82,6 +82,7 @@ message OrderInfoResponse {
   string address = 8;
   string name = 9;
   string mobile = 10;
+  string tradeNo = 11;
 }
 
 // 订单列表请求参数
